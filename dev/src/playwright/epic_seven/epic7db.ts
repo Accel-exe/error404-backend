@@ -2,8 +2,9 @@ import { chromium } from "playwright";
 import fs from 'fs/promises'
 import path from 'path'
 import { getRandomUserAgent } from "../../services/playwright.js";
+import { error } from "console";
 
-export const scapyNames = async (): Promise<Array<string>> => {
+export const scapyNamesDb = async (): Promise<Array<string>> => {
     const browser = await chromium.launch()
     await browser.newContext({userAgent: getRandomUserAgent()})
     const page = await browser.newPage()
@@ -13,38 +14,50 @@ export const scapyNames = async (): Promise<Array<string>> => {
 
     console.log("Coletando os Nomes")
     const listCaracters = await page.$$('.hero')
-    const saveList = await Promise.all(listCaracters.map(async(e) => {
+    for(const e of listCaracters) {
         const name:string | any = await e.getAttribute('data-name')
-        console.log(name + ' Coletado')
+
         names.push(name.replace(/ /g, '-').toLowerCase())
-    }))
+        console.log(name + ' Coletado')
+    }
     
     console.log(`Todos os ${names.length} nomes foram coletados`)
     browser.close()
     return names
 }
 
-export const scrapyIcons = async (): Promise<void> => {
+export const scrapyIconsDb = async (): Promise<void> => {
     const browser = await chromium.launch()
-    const raiz = path.resolve('dev/src/img/epic_seven/icons');
-    const names:Array<string> = await scapyNames()
-    const imgs: Array<string> = [] 
+    const source = path.resolve('dev/src/img/epic_seven/icons');
+    const names:Array<string> = await scapyNamesDb()
+    const icons: Array<string> = [] 
+    const notSaveIcons: Array<string> = []
     
-    console.log("Inciando Salvamento de Imagems")
-    const saveImages = await Promise.all(names.map(async(e) => {
+    console.log("Inciando Salvamento de Icones")
+    for(const name in names) {
         await browser.newContext({userAgent: getRandomUserAgent()})
         const page = await browser.newPage()
         page.setDefaultNavigationTimeout(240000);
 
-        const response:any = await page.goto(`https://epic7db.com/images/heroes/${e}.webp`)
+        console.log(`Navegando ate a pagina do personagem ${name}`)
+        const response:any = await page.goto(`https://epic7db.com/images/heroes/${name}.webp`)
         const img = await response.body()
-        const imagePath = path.join(raiz, `${e}.webp`)
-        await fs.writeFile(imagePath, img)
-        imgs.push(e)
-        console.log(`${e} Salva com sucesso`)
-        await page.close()
-    }))
+        const imagePath = path.join(source, `${name}.webp`)
 
-    console.log(`todas as ${imgs.length} imagens salvas com sucesso`)
+        if (img) {
+            await fs.writeFile(imagePath, img)
+            icons.push(name)
+            console.log(`${name} Salva com sucesso`)
+            await page.close()
+        } else {console.log(`Imagem do personagem ${name} nao existe`); notSaveIcons.push(`Imagem de ${name} nao existe`)}
+    }
+
+    console.log(`todas as ${icons.length} Icones salvas com sucesso`)
+    if(notSaveIcons.length > 0) {
+        for(const error of notSaveIcons) {
+            console.log(error)
+            console.log(`Total de imagens nao salvas ` + notSaveIcons.length)
+        }  
+    }
     browser.close()
 }
