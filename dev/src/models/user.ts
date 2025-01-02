@@ -1,5 +1,4 @@
 import {PrismaClient, Prisma, User } from "@prisma/client"
-import { query } from "express"
 
 const prisma = new PrismaClient()
 
