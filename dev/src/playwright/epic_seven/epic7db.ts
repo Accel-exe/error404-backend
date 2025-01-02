@@ -35,7 +35,8 @@ export const scrapyIconsDb = async (): Promise<void> => {
     const notSaveIcons: Array<string> = []
     
     console.log("Inciando Salvamento de Icones")
-    for(const name in names) {
+    for(const name of names) {
+        console.log(name)
         await browser.newContext({userAgent: getRandomUserAgent()})
         const page = await browser.newPage()
         page.setDefaultNavigationTimeout(240000);

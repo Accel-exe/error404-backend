@@ -38,7 +38,7 @@ export const scapyImgsx = async (): Promise<void> => {
     const notSaveImgs: Array<string> = []
 
     console.log("Iniciando Salvamento das Imagens")
-    for (const name of names) {
+    for(const name of names) {
         await browser.newContext({userAgent: getRandomUserAgent()})
         const page = await browser.newPage()
         page.setDefaultNavigationTimeout(380000);

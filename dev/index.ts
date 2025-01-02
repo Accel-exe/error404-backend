@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 
 import { scapyImgsx } from './src/playwright/epic_seven/epic7x.js';
+import { scrapyIconsDb } from './src/playwright/epic_seven/epic7db.js';
 
 import routes from './src/routes/index.js';
 
