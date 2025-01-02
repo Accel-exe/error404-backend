@@ -21,6 +21,7 @@ const scapyNamesx = async (): Promise<Array<string>> => {
         const tagName: string | any = await divName?.$('span')
         const name: string = await tagName.innerText()
         names.push(name.replace(/ /g, '-').toLowerCase())
+        console.log(name + ' Coletado')
     }
 
     console.log(`Todos os ${names.length} foram coletados`)
@@ -31,6 +32,7 @@ const scapyNamesx = async (): Promise<Array<string>> => {
 export const scapyImgsx = async (): Promise<void> => {
     const browser = await chromium.launch()
     const source = path.resolve('dev/src/img/epic_seven/caracters')
+    const sourceLogs = path.resolve('dev/src/img/epic_seven/logs/Erro_Save_imgs.txt')
     const names: Array<string> = await scapyNamesDb()
     const imgs: Array<string> = []
     const notSaveImgs: Array<string> = []
@@ -66,10 +68,8 @@ export const scapyImgsx = async (): Promise<void> => {
     
     console.log(`todas as ${imgs.length} Imagens salvas com sucesso`)
     if (notSaveImgs.length > 0) {
-        for(const error in notSaveImgs) {
-            console.log(error)
-            console.log("Total de imagens nao salvas " + notSaveImgs.length)
-        }
+            const content = notSaveImgs.join('\n')
+            await fs.writeFile(sourceLogs, content)
     }
 
     browser.close()
