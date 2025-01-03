@@ -45,7 +45,7 @@ export const scapyImgsx = async (): Promise<void> => {
 
         console.log("Navegando ate a pagina do personagem " + name)
         await page.goto(`https://epic7x.com/character/${name}/`)
-        const imgDiv = await page.$('.character-ingame-img')
+        const imgDiv = await page.$('#app div section div > div:last-child img')
         const imgSrc:string | any = await imgDiv?.getAttribute('src')
         
         console.log(`Verificando se a url da imagem do personagem ${name} existe` )
