@@ -2,7 +2,6 @@ import { chromium } from "playwright";
 import fs from 'fs/promises'
 import path from 'path'
 import { getRandomUserAgent } from "../../services/playwright.js";
-import { error } from "console";
 
 export const scapyNamesDb = async (): Promise<Array<string>> => {
     const browser = await chromium.launch()
@@ -36,7 +35,6 @@ export const scrapyIconsDb = async (): Promise<void> => {
     
     console.log("Inciando Salvamento de Icones")
     for(const name of names) {
-        console.log(name)
         await browser.newContext({userAgent: getRandomUserAgent()})
         const page = await browser.newPage()
         page.setDefaultNavigationTimeout(240000);
@@ -60,4 +58,38 @@ export const scrapyIconsDb = async (): Promise<void> => {
         await fs.writeFile(sourceLogs, content)
     }
     browser.close()
+}
+
+export const scrapySkill = async (): Promise<void> => {
+    const browser = await chromium.launch()
+    const source = path.resolve('dev/src/img/epic_seven/skills');
+    const sourceLogs = path.resolve('dev/src/img/epic_seven/logs/Erro_save_Skills.txt')
+    const names: Array<string> = await scapyNamesDb()
+    const skils: Array<string> = [] 
+    const notSaveSkils: Array<string> = []
+
+    console.log("Inciando Salvamento das Skils")
+    for (const name of names) {
+        await browser.newContext({userAgent: getRandomUserAgent()})
+        const page = await browser.newPage()
+        page.setDefaultNavigationTimeout(240000);
+
+        const response:any = await page.goto(`https://epic7db.com/images/skills/${name}_skill_3.webp`)
+        const img = await response.body()
+        const imagePath = path.join(source, `${name}skill3.webp`)
+
+        if (img) {
+            await fs.writeFile(imagePath, img)
+            skils.push(name)
+            console.log(`Skill de ${name} Salva com sucesso`)
+            await page.close()
+        } else {console.log(`Skill do personagem ${name} nao existe`); notSaveSkils.push(`Skill de ${name} nao existe`)}        
+    }
+
+    console.log(`todas as ${skils.length} Icones salvas com sucesso`)
+    if(notSaveSkils.length > 0) {
+        const content = notSaveSkils.join('\n')
+        await fs.writeFile(sourceLogs, content)
+    }
+    await browser.close()
 }
