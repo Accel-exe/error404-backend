@@ -1,12 +1,29 @@
 import { Prisma, PrismaClient, User } from "@prisma/client"
+import { Response, Request, NextFunction } from "express"
+import { createToken, verifyToken } from "../services/token.js"
+import bcrypt from 'bcrypt'
+
 const prisma = new PrismaClient()
 
-export const verifyEmail = async (email: string): Promise<any> => {
-    const verify = await prisma.user.findUnique({
-        where: {email},
+export const checkToken = (req: Request, res: Response, next: NextFunction): void | any => {
+    const token: any = req.headers['authorization']?.split(' ')[1]
+    if(!token) {return res.status(400).json({"err": "Token Inexistente"})}
+    const verify = verifyToken(token)
+    req.body = verify
+    next()
+}
+
+export const loginToken = async (req:Request, res:Response, next:NextFunction): Promise<any | void> => {
+    const verifyEmail = await prisma.user.findUnique({
+        where: {email: req.body.email},
         select: {
-            email: true
+            id: true,
+            password: true
         }
     })
-    return verify
+    if(!verifyEmail) {return res.status(400).json({"err": "Email Inexistente"})}
+    const verifyPassword = await bcrypt.compare(req.body.password, verifyEmail.password)
+    if (!verifyPassword) {return res.status(400).json({"err": "Password Incorreto}"})}
+    req.body = {'id': verifyEmail.id}
+    next()
 }

@@ -2,12 +2,14 @@ import {PrismaClient, Prisma, User } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
-export const createUser = async (data: Prisma.UserCreateInput): Promise<Pick<User, 'id' | 'name'>> => {
+export const createUser = async (data: Prisma.UserCreateInput): Promise<Omit<User, 'img' | 'password' | 'plataform'>> => {
     const user = await prisma.user.create({
         data,
         select: {
             id: true,
-            name: true
+            role: true,
+            name: true,
+            email: true
         }
     })
     return user
@@ -26,7 +28,7 @@ export const updateUser = async (id:string, data:Prisma.UserUpdateInput): Promis
     return user
 }
 
-export const findUser = async (id:string): Promise<Omit<User, 'password'> | null> => {
+export const findUser = async (id:string): Promise<Omit<User, 'password'> | any> => {
     const user = await prisma.user.findUnique({
         where: {id},
         select: {
@@ -35,7 +37,8 @@ export const findUser = async (id:string): Promise<Omit<User, 'password'> | null
             name: true,
             img: true,
             email: true,
-            plataform: true
+            plataform: true,
+            password: false
         }
     })
     return user
