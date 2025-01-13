@@ -6,8 +6,8 @@ import bcrypt from 'bcrypt'
 const prisma = new PrismaClient()
 
 export const checkToken = (req: Request, res: Response, next: NextFunction): void | any => {
-    const token: any = req.headers['authorization']?.split(' ')[1]
-    if(!token) {return res.status(400).json({"err": "Token Inexistente"})}
+    const token: any = req.cookies.token
+    if(!token) {return res.status(200).json({"err": "Token Inexistente"})}
     const verify = verifyToken(token)
     req.body = verify
     next()
@@ -21,9 +21,9 @@ export const loginToken = async (req:Request, res:Response, next:NextFunction): 
             password: true
         }
     })
-    if(!verifyEmail) {return res.status(400).json({"err": "Email Inexistente"})}
+    if(!verifyEmail) {return res.status(200).json({"err": "Email Inexistente"})}
     const verifyPassword = await bcrypt.compare(req.body.password, verifyEmail.password)
-    if (!verifyPassword) {return res.status(400).json({"err": "Password Incorreto}"})}
+    if (!verifyPassword) {return res.status(200).json({"err": "Password Incorreto}"})}
     req.body = {'id': verifyEmail.id}
     next()
 }
