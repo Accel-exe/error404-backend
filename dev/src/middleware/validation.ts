@@ -8,7 +8,6 @@ const prisma = new PrismaClient()
 export const createUserValidation = async (req:Request, res:Response, next:NextFunction): Promise<void | any> => {
     try {
         const yup = await createUserValidations.validate(req.body, {abortEarly: false})
-        console.log(yup)
         const user = await prisma.user.findMany({where: {email: req.body.email}})
         if (user[0]) {return res.status(200).json({'err': "ja existe um usuario com esse email: " + req.body.email})}
         const hashPassword = await bcrypt.hash(req.body.password, 10)
